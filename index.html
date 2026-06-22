@@ -10,6 +10,7 @@
         .drop-zone.dragover { border-color: #3b82f6; background: #eff6ff; }
         .img-preview { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
         .file-input { display: none; }
+        [contenteditable]:focus { outline: 2px solid #fb923c; border-radius: 4px; padding: 2px; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans leading-relaxed">
@@ -22,8 +23,8 @@
         </div>
 
         <header class="text-center mb-12">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-4">비교할수록 완벽한 선택, 프리미엄 노트북</h1>
-            <p class="text-xl text-gray-600">당신의 생산성을 한 단계 높여줄 최고의 파트너</p>
+            <h1 id="title" contenteditable="true" class="text-4xl font-extrabold text-gray-900 mb-4">비교할수록 완벽한 선택, 프리미엄 노트북</h1>
+            <p id="subtitle" contenteditable="true" class="text-xl text-gray-600">당신의 생산성을 한 단계 높여줄 최고의 파트너</p>
         </header>
 
         <div class="mb-12">
@@ -41,12 +42,12 @@
             <h2 class="text-2xl font-bold mb-8 border-l-4 border-orange-500 pl-4">이 제품을 선택해야 하는 이유</h2>
             <div class="grid md:grid-cols-2 gap-8">
                 <div class="p-6 bg-gray-50 rounded-xl">
-                    <h3 class="font-bold text-lg mb-2">🚀 압도적인 퍼포먼스</h3>
-                    <p class="text-sm text-gray-600">최신 프로세서 탑재로 무거운 작업도 부드럽게 처리합니다.</p>
+                    <h3 contenteditable="true" class="font-bold text-lg mb-2">🚀 압도적인 퍼포먼스</h3>
+                    <p contenteditable="true" class="text-sm text-gray-600">최신 프로세서 탑재로 무거운 작업도 부드럽게 처리합니다.</p>
                 </div>
                 <div class="p-6 bg-gray-50 rounded-xl">
-                    <h3 class="font-bold text-lg mb-2">🔋 하루 종일 가는 배터리</h3>
-                    <p class="text-sm text-gray-600">한 번 충전으로 업무 시간 내내 여유롭게 사용하세요.</p>
+                    <h3 contenteditable="true" class="font-bold text-lg mb-2">🔋 하루 종일 가는 배터리</h3>
+                    <p contenteditable="true" class="text-sm text-gray-600">한 번 충전으로 업무 시간 내내 여유롭게 사용하세요.</p>
                 </div>
             </div>
         </section>
@@ -54,9 +55,9 @@
         <section class="mb-16">
             <h2 class="text-2xl font-bold mb-6 border-l-4 border-orange-500 pl-4">상세 사양</h2>
             <table class="w-full text-left text-sm">
-                <tr class="border-b"><th class="py-4 text-gray-500">프로세서</th><td class="py-4">최신형 고성능 칩셋</td></tr>
-                <tr class="border-b"><th class="py-4 text-gray-500">메모리</th><td class="py-4">16GB RAM</td></tr>
-                <tr class="border-b"><th class="py-4 text-gray-500">디스플레이</th><td class="py-4">고해상도 Retina 디스플레이</td></tr>
+                <tr class="border-b"><th class="py-4 text-gray-500">프로세서</th><td contenteditable="true" class="py-4">최신형 고성능 칩셋</td></tr>
+                <tr class="border-b"><th class="py-4 text-gray-500">메모리</th><td contenteditable="true" class="py-4">16GB RAM</td></tr>
+                <tr class="border-b"><th class="py-4 text-gray-500">디스플레이</th><td contenteditable="true" class="py-4">고해상도 Retina 디스플레이</td></tr>
             </table>
         </section>
 
@@ -73,12 +74,31 @@
     </div>
 
     <script>
-        // 페이지 로드 시 저장된 이미지 불러오기
+        // 수정된 내용 자동 저장
+        document.body.addEventListener('input', () => {
+            const editableElements = document.querySelectorAll('[contenteditable="true"]');
+            const data = {};
+            editableElements.forEach(el => {
+                data[el.id || el.innerText.substring(0, 10)] = el.innerHTML;
+            });
+            localStorage.setItem('pageContent', JSON.stringify(data));
+        });
+
+        // 페이지 로드 시 저장된 내용 불러오기
         window.onload = () => {
             const savedImage = localStorage.getItem('productImage');
             if (savedImage) {
                 const dropZone = document.getElementById('main-drop-zone');
                 dropZone.innerHTML = `<img src="${savedImage}" class="img-preview">`;
+            }
+
+            const savedContent = JSON.parse(localStorage.getItem('pageContent'));
+            if (savedContent) {
+                const editableElements = document.querySelectorAll('[contenteditable="true"]');
+                editableElements.forEach(el => {
+                    const key = el.id || el.innerText.substring(0, 10);
+                    if (savedContent[key]) el.innerHTML = savedContent[key];
+                });
             }
         };
 
@@ -99,7 +119,6 @@
                     const imageData = event.target.result;
                     const dropZone = document.getElementById('main-drop-zone');
                     dropZone.innerHTML = `<img src="${imageData}" class="img-preview">`;
-                    // 로컬 스토리지에 이미지 저장
                     localStorage.setItem('productImage', imageData);
                 };
                 reader.readAsDataURL(file);
